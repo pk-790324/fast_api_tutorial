@@ -1,2 +1,3 @@
 fastapi[all]
 scalar_fastapi
+typing

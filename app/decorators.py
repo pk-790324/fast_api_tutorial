@@ -54,4 +54,17 @@ def log3(text:str):
     print(text)
 
 log3('hello')           
-            
+
+
+
+# Example 4
+
+from typing import Callable,Any
+
+def decorator(func:Callable[[int,int],float]):
+    pass 
+#i.e take two int argument and return the float 
+
+def decorator2(func:Callable[[Any],None]):
+    pass
+
