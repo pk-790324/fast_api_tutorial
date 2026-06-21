@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException,status
 from scalar_fastapi import get_scalar_api_reference
 from typing import Any
 app=FastAPI()
@@ -80,6 +80,73 @@ def get_shhipment_data(id:int)->dict[str,Any]:
     if id not in shipment_data:
         return {"details":"Given id not exist!"}
     return shipment_data[id]
+
+
+#========================================================================================================
+#===============================Module 4 : Query Parameters =============================================
+#========================================================================================================
+
+# 1. Query parameters 
+
+@app.get("/shipment_data1")
+def get_shipment_data1(id:int)->dict[str,Any]:
+    if id not in shipment_data:
+        return {"details":"given id not exist"}
+    return shipment_data[id]
+
+
+# Most used format
+
+@app.get("/shipment_data2")
+def get_shipment_data2(id:int|None=None)->dict[str,Any]: # test id:int or id:int|None or id:int|None=None in scalar documentation
+    if not id: #executed when id field is blank
+        id=max(shipment_data.keys())
+        return shipment_data[id]
+        
+    if id not in shipment_data:
+        return {"details":"Given ID not exist!"}
+    return shipment_data[id]
+
+
+#========================================================================================================
+#================================ Module 4 : HTTP Exception =============================================
+#========================================================================================================
+
+
+
+@app.get("/shipment_data3")
+def get_shipment_data3(id:int|None=None)->dict[str,Any]:
+    if id not in shipment_data:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="GIVEN ID DOESNOT EXISTS"
+        )
+    return shipment_data[id]
+    
+# Note: After executing /shipment_data3 in scalar documentation
+# you should see 9ms, Size:36 B, Status:404 Not Found
+# which is HTTP Exception
+
+
+#========================================================================================================
+#================================ Module 4 : Post Method =============================================
+#========================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
