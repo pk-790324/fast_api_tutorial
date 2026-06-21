@@ -1,193 +1,214 @@
-from fastapi import FastAPI, HTTPException,status
+from fastapi import FastAPI, HTTPException, status
 from scalar_fastapi import get_scalar_api_reference
 from typing import Any
-app=FastAPI()
 
-@app.get("/shipment") #defining endpoints
+app = FastAPI()
+
+
+@app.get("/shipment")  # defining endpoints
 def get_shipment():
-    return{
-        "content":"wooden table",
-        "status":"in transit"
-    }
+    return {"content": "wooden table", "status": "in transit"}
 
 
-
-#path parameters
+# path parameters
 
 
 @app.get("/shipment1/{id}")
-def get_shipment1(id:int)->dict[str,Any]: #key:str, value:Any
-    return{
-        "id":id,
-        "weight":2.32,
-        "content":"wooden box",
-        "status":"delivered"     
-    }
-    
+def get_shipment1(id: int) -> dict[str, Any]:  # key:str, value:Any
+    return {"id": id, "weight": 2.32, "content": "wooden box", "status": "delivered"}
+
+
 # Route Ordering
+
 
 @app.get("/shipment1/latest")
 def get_latest_shipment():
     return {
-        "id":"latest",
-        "weight":77,
-        "content":"glass ware",
-        "status":"processing"
+        "id": "latest",
+        "weight": 77,
+        "content": "glass ware",
+        "status": "processing",
     }
+
+
 # Note: to make run /shipment/latest make sure above /shipment1/{id} is comment
 # because route ordering matters and /shipment/{id} requires input
 # or run /shipment1/latest/above the /shipment1/{id}
 
 
-
-#simple database
+# simple database
 shipment_data = {
-    23323: {
-        "weight": 32,
-        "content": "wooden box",
-        "status": "delivered"
-    },
-    23324: {
-        "weight": 15,
-        "content": "electronics",
-        "status": "in transit"
-    },
-    23325: {
-        "weight": 8,
-        "content": "clothing",
-        "status": "processing"
-    },
-    23326: {
-        "weight": 50,
-        "content": "furniture",
-        "status": "out for delivery"
-    },
-    23327: {
-        "weight": 22,
-        "content": "books",
-        "status": "delivered"
-    },
-    23328: {
-        "weight": 12,
-        "content": "kitchen utensils",
-        "status": "pending"
-    }
+    23323: {"weight": 32, "content": "wooden box", "status": "delivered"},
+    23324: {"weight": 15, "content": "electronics", "status": "in transit"},
+    23325: {"weight": 8, "content": "clothing", "status": "processing"},
+    23326: {"weight": 50, "content": "furniture", "status": "out for delivery"},
+    23327: {"weight": 22, "content": "books", "status": "delivered"},
+    23328: {"weight": 12, "content": "kitchen utensils", "status": "pending"},
 }
 
 
 @app.get("/shipment_data/{id}")
-def get_shhipment_data(id:int)->dict[str,Any]:
+def get_shhipment_data(id: int) -> dict[str, Any]:
     if id not in shipment_data:
-        return {"details":"Given id not exist!"}
+        return {"details": "Given id not exist!"}
     return shipment_data[id]
 
 
-#========================================================================================================
-#===============================Module 4 : Query Parameters =============================================
-#========================================================================================================
+# ========================================================================================================
+# ===============================Module 4 : Query Parameters =============================================
+# ========================================================================================================
 
-# 1. Query parameters 
+# 1. Query parameters
+
 
 @app.get("/shipment_data1")
-def get_shipment_data1(id:int)->dict[str,Any]:
+def get_shipment_data1(id: int) -> dict[str, Any]:
     if id not in shipment_data:
-        return {"details":"given id not exist"}
+        return {"details": "given id not exist"}
     return shipment_data[id]
 
 
 # Most used format
 
+
 @app.get("/shipment_data2")
-def get_shipment_data2(id:int|None=None)->dict[str,Any]: # test id:int or id:int|None or id:int|None=None in scalar documentation
-    if not id: #executed when id field is blank
-        id=max(shipment_data.keys())
+def get_shipment_data2(
+    id: int | None = None,
+) -> dict[
+    str, Any
+]:  # test id:int or id:int|None or id:int|None=None in scalar documentation
+    if not id:  # executed when id field is blank
+        id = max(shipment_data.keys())
         return shipment_data[id]
-        
+
     if id not in shipment_data:
-        return {"details":"Given ID not exist!"}
+        return {"details": "Given ID not exist!"}
     return shipment_data[id]
 
 
-#========================================================================================================
-#================================ Module 4 : HTTP Exception =============================================
-#========================================================================================================
-
+# ========================================================================================================
+# ================================ Module 4 : HTTP Exception =============================================
+# ========================================================================================================
 
 
 @app.get("/shipment_data3")
-def get_shipment_data3(id:int|None=None)->dict[str,Any]:
+def get_shipment_data3(id: int | None = None) -> dict[str, Any]:
     if id not in shipment_data:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="GIVEN ID DOESNOT EXISTS"
+            status_code=status.HTTP_404_NOT_FOUND, detail="GIVEN ID DOESNOT EXISTS"
         )
     return shipment_data[id]
-    
+
+
 # Note: After executing /shipment_data3 in scalar documentation
 # you should see 9ms, Size:36 B, Status:404 Not Found
 # which is HTTP Exception
 
 
-#========================================================================================================
-#================================ Module 4 : Post Method ================================================
-#========================================================================================================
+# ========================================================================================================
+# ================================ Module 4 : Post Method ================================================
+# ========================================================================================================
 
-# here we use /shipment_data3 get method 
+
+# here we use /shipment_data3 get method
 @app.post("/shipment_data3")
-def post_shipment_data3(content:str,weight:float)->dict[str,int]:
-    if weight>25.0:
+def post_shipment_data3(content: str, weight: float) -> dict[str, int]:
+    if weight > 25.0:
         raise HTTPException(
             status_code=status.HTTP_406_NOT_ACCEPTABLE,
-            detail="Weight must be less than 25 kg"
+            detail="Weight must be less than 25 kg",
         )
-    new_id=max(shipment_data.keys())+1
-    shipment_data[new_id]={
-        "content":content,
-        "weight":weight,
-        "status":"placed"
-    }
-    return {"id":new_id}
+    new_id = max(shipment_data.keys()) + 1
+    shipment_data[new_id] = {"content": content, "weight": weight, "status": "placed"}
+    return {"id": new_id}
 
 
+# ========================================================================================================
+# ================================ Module 4 : Request Body ===============================================
+# ========================================================================================================
 
-#========================================================================================================
-#================================ Module 4 : Request Body ===============================================
-#========================================================================================================
 
 @app.post("/shipment_data4")
-def request_body_shipment_data4(data:dict[str,Any])->dict[str,Any]:
-    content=data["content"]
-    weight=data["weight"]
-    #validata weight
-    if weight>=25:
+def request_body_shipment_data4(data: dict[str, Any]) -> dict[str, Any]:
+    content = data["content"]
+    weight = data["weight"]
+    # validata weight
+    if weight >= 25:
         raise HTTPException(
             status_code=status.HTTP_406_NOT_ACCEPTABLE,
-            detail="Maximum weight limit is 25kgs"
+            detail="Maximum weight limit is 25kgs",
         )
-    new_id=max(shipment_data.keys())+1
-    shipment_data[new_id]={
-        "content":content,
-        "weight":weight,
-        "status":"placed"
-    }
-    return {"id":new_id}
+    new_id = max(shipment_data.keys()) + 1
+    shipment_data[new_id] = {"content": content, "weight": weight, "status": "placed"}
+    return {"id": new_id}
 
 
-#========================================================================================================
-#============================= Module 4 : Path and Query Parameters =====================================
-#========================================================================================================
+# ========================================================================================================
+# ============================= Module 4 : Path and Query Parameters =====================================
+# ========================================================================================================
+
 
 @app.get("/shipment/{field}")
-def get_shipment_field(field:str,id:int)->Any:
+def get_shipment_field(field: str, id: int) -> Any:
     return shipment_data[id][field]
 
+
+# ========================================================================================================
+# ==================================== Module 5 : PUT Method =============================================
+# ========================================================================================================
+
+# put method is used to update the all value of the existing data
+# to check  data is changed or not check on get_shipment_data2 or 3
+
+
+@app.put("/shipment_data4")
+def update_shipment_data(
+    id: int, content: str, weight: float, status: str
+) -> dict[str, Any]:
+    shipment_data[id] = {"content": content, "weight": weight, "status": status}
+    return {"id": id, "content": content, "weight": weight, "status": status}
+
+
+# ========================================================================================================
+# ==================================== Module 5 : PATCH Method ===========================================
+# ========================================================================================================
+
+
+# patch method is used to update only the required field in the existing data
+# to check data is changed or not check on get_shipment_data2 or 3
+
+
+@app.patch("/shipment_data4")
+def patch_shipment_data(
+    id: int, body:dict[str,Any]
+) -> dict[str, Any]:
+    shipment=shipment_data[id]
+    shipment.update(body)
+    return shipment
+
+
+
+# ========================================================================================================
+# ==================================== Module 5 : DELETE Method ==========================================
+# ========================================================================================================
+
+# used to delete the data from the existing data
+
+@app.delete("/shipment_data4")
+def delete_shipment_data(id:int)->dict[str,Any]:
+    shipment_data.pop(id)
+    return {"detail":f"shipment with id: {id} is deleted"}
+
+
+
+
+
+
 # ======================================================================================================
 # ======================================================================================================
 # ======================================================================================================
 
-@app.get("/scalar",include_in_schema=False)
+
+@app.get("/scalar", include_in_schema=False)
 def get_scalar_docs():
-    return get_scalar_api_reference(
-        openapi_url=app.openapi_url,
-        title="Scalar API"
-    )
+    return get_scalar_api_reference(openapi_url=app.openapi_url, title="Scalar API")
