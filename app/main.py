@@ -129,27 +129,61 @@ def get_shipment_data3(id:int|None=None)->dict[str,Any]:
 
 
 #========================================================================================================
-#================================ Module 4 : Post Method =============================================
+#================================ Module 4 : Post Method ================================================
 #========================================================================================================
 
+# here we use /shipment_data3 get method 
+@app.post("/shipment_data3")
+def post_shipment_data3(content:str,weight:float)->dict[str,int]:
+    if weight>25.0:
+        raise HTTPException(
+            status_code=status.HTTP_406_NOT_ACCEPTABLE,
+            detail="Weight must be less than 25 kg"
+        )
+    new_id=max(shipment_data.keys())+1
+    shipment_data[new_id]={
+        "content":content,
+        "weight":weight,
+        "status":"placed"
+    }
+    return {"id":new_id}
 
 
 
+#========================================================================================================
+#================================ Module 4 : Request Body ===============================================
+#========================================================================================================
+
+@app.post("/shipment_data4")
+def request_body_shipment_data4(data:dict[str,Any])->dict[str,Any]:
+    content=data["content"]
+    weight=data["weight"]
+    #validata weight
+    if weight>=25:
+        raise HTTPException(
+            status_code=status.HTTP_406_NOT_ACCEPTABLE,
+            detail="Maximum weight limit is 25kgs"
+        )
+    new_id=max(shipment_data.keys())+1
+    shipment_data[new_id]={
+        "content":content,
+        "weight":weight,
+        "status":"placed"
+    }
+    return {"id":new_id}
 
 
+#========================================================================================================
+#============================= Module 4 : Path and Query Parameters =====================================
+#========================================================================================================
 
+@app.get("/shipment/{field}")
+def get_shipment_field(field:str,id:int)->Any:
+    return shipment_data[id][field]
 
-
-
-
-
-
-
-
-
-
-
-
+# ======================================================================================================
+# ======================================================================================================
+# ======================================================================================================
 
 @app.get("/scalar",include_in_schema=False)
 def get_scalar_docs():
