@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, status
 from scalar_fastapi import get_scalar_api_reference
 from typing import Any
-
+from pydantic import  BaseModel
 app = FastAPI()
 
 
@@ -10,17 +10,26 @@ def get_shipment():
     return {"content": "wooden table", "status": "in transit"}
 
 
-# path parameters
 
+# ========================================================================================================
+# =============================== Module 3 : Path Parameters==============================================
+# ========================================================================================================
+
+# path parameters
 
 @app.get("/shipment1/{id}")
 def get_shipment1(id: int) -> dict[str, Any]:  # key:str, value:Any
     return {"id": id, "weight": 2.32, "content": "wooden box", "status": "delivered"}
 
 
+
+
+
+# ========================================================================================================
+# =============================== Module 3 : Route Ordering ==============================================
+# ========================================================================================================
+
 # Route Ordering
-
-
 @app.get("/shipment1/latest")
 def get_latest_shipment():
     return {
@@ -35,6 +44,11 @@ def get_latest_shipment():
 # because route ordering matters and /shipment/{id} requires input
 # or run /shipment1/latest/above the /shipment1/{id}
 
+
+
+# ========================================================================================================
+# =============================== Module 3 : Simple Database =============================================
+# ========================================================================================================
 
 # simple database
 shipment_data = {
@@ -59,7 +73,6 @@ def get_shhipment_data(id: int) -> dict[str, Any]:
 # ========================================================================================================
 
 # 1. Query parameters
-
 
 @app.get("/shipment_data1")
 def get_shipment_data1(id: int) -> dict[str, Any]:
@@ -200,8 +213,31 @@ def delete_shipment_data(id:int)->dict[str,Any]:
     return {"detail":f"shipment with id: {id} is deleted"}
 
 
+# ========================================================================================================
+# ==================================== Module 6 : Pydantic Model ==========================================
+# ========================================================================================================
 
+# here we are using pydantic model for type validations
 
+class Shipment(BaseModel):
+    content:str
+    weight:float
+    status:str
+
+@app.post("/shipment")
+def pydantic_submit_method(body:Shipment)->dict[str,Any]:
+    if body.weight>25:
+        raise HTTPException(
+            status_code=status.HTTP_406_NOT_ACCEPTABLE,
+            detail="Maximum weight limit is 25 kgs",
+        )
+    new_id=max(shipment_data.keys())+1
+    shipment_data[new_id]={
+        "content":body.content,
+        "weight":body.weight,
+        "status":body.status}
+    return {"id":new_id,"data":shipment_data[new_id]}
+    
 
 
 # ======================================================================================================
@@ -212,3 +248,8 @@ def delete_shipment_data(id:int)->dict[str,Any]:
 @app.get("/scalar", include_in_schema=False)
 def get_scalar_docs():
     return get_scalar_api_reference(openapi_url=app.openapi_url, title="Scalar API")
+
+
+# ======================================================================================================
+# ======================================================================================================
+# ======================================================================================================
