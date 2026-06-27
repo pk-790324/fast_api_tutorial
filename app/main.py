@@ -1,7 +1,8 @@
 from fastapi import FastAPI, HTTPException, status
 from scalar_fastapi import get_scalar_api_reference
 from typing import Any
-from pydantic import  BaseModel
+from pydantic import  BaseModel, Field
+from random import randint
 app = FastAPI()
 
 
@@ -214,7 +215,7 @@ def delete_shipment_data(id:int)->dict[str,Any]:
 
 
 # ========================================================================================================
-# ==================================== Module 6 : Pydantic Model ==========================================
+# ==================================== Module 6 : Pydantic Model =========================================
 # ========================================================================================================
 
 # here we are using pydantic model for type validations
@@ -239,10 +240,40 @@ def pydantic_submit_method(body:Shipment)->dict[str,Any]:
     return {"id":new_id,"data":shipment_data[new_id]}
     
 
+# ========================================================================================================
+# ==================================== Module 6 : Model Fields ===========================================
+# ========================================================================================================
 
-# ======================================================================================================
-# ======================================================================================================
-# ======================================================================================================
+def random_number():
+    return randint(200,300)
+
+
+class Shipment1_field(BaseModel):
+    content:str=Field(max_length=20,description="content of the shipment")
+    weight:float=Field(le=90,ge=3,description="weight of the shipment")
+    status:str=Field(description="status of the description")
+    product_id:int=Field(default_factory=random_number,description="product id of the shipment")
+    
+
+# lt-> less than 
+# le -> less than equal to 
+# gt-> greater than
+# ge-> greater than equal to 
+
+@app.post("/shipment_field")
+def field_submit_method(body1:Shipment1_field)->dict[str,Any]:
+    new_id=max(shipment_data.keys())+1
+    shipment_data[new_id]={
+        "content":body1.content,
+        "weight":body1.weight,
+        "status":body1.status,
+    }
+    return {"id":new_id,"data":shipment_data[new_id]}
+
+
+# ==================================================================================================
+# ==================================================================================================
+# ==================================================================================================
 
 
 @app.get("/scalar", include_in_schema=False)
