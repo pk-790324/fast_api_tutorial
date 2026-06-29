@@ -3,6 +3,8 @@ from scalar_fastapi import get_scalar_api_reference
 from typing import Any
 from pydantic import  BaseModel, Field
 from random import randint
+from enum import Enum
+
 app = FastAPI()
 
 
@@ -269,6 +271,79 @@ def field_submit_method(body1:Shipment1_field)->dict[str,Any]:
         "status":body1.status,
     }
     return {"id":new_id,"data":shipment_data[new_id]}
+
+
+
+# ========================================================================================================
+# ==================================== Module 6 : Python: Enum ===========================================
+# ========================================================================================================
+
+class ShipmentStatus(str,Enum):
+    placed="placed"
+    in_transit="in_transit"
+    out_for_delivery="out_for_delivery"
+    delivered="delivered"
+# if shipment status if different from the above then it raise error
+    
+@app.patch("/shipment_data")
+def patch_shipment_data_with_enum(
+    id: int, body:dict[str,ShipmentStatus]
+) -> dict[str, Any]:
+    shipment=shipment_data[id]
+    shipment.update(body)
+    return {"shipment_data":shipment_data[id]}
+
+
+    """
+    give id of sample item in query parameters and only add status
+    {
+        "status":"delivered"
+    }
+    """
+
+
+# ========================================================================================================
+# ==================================== Module 6 : Response Model =========================================
+# ========================================================================================================
+
+#problem: during return time any data is returned so to fix that
+# we use response model
+
+class Shipment_response(BaseModel): # return type
+    content:str
+    weight:float #=Field(le=10,ge=3) if we enable this and weight is not compatible during return time it raise internal server error
+    status:str
+    
+@app.get("/shipment_response")
+def get_shipment_resonse(id:int)->Shipment_response:
+    if id not in shipment_data:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Given id does't exists"
+        )
+    shipment=shipment_data[id]
+    #shipment.pop("content") # i.e if we miss content it raise: Internal Server error
+    return Shipment_response(**shipment)
+
+# note: when you expand 200 Successful Response in Response you 
+# saw Shipment_response object like:
+    """
+    content string · Content required
+    status string · Status required
+    weight number · Weight required
+    
+    """
+
+# i
+
+
+
+
+
+
+
+
+
 
 
 # ==================================================================================================
