@@ -56,11 +56,11 @@ def get_latest_shipment():
 # simple database
 shipment_data = {
     23323: {"weight": 32, "content": "wooden box", "status": "delivered"},
-    23324: {"weight": 15, "content": "electronics", "status": "in transit"},
-    23325: {"weight": 8, "content": "clothing", "status": "processing"},
-    23326: {"weight": 50, "content": "furniture", "status": "out for delivery"},
+    23324: {"weight": 15, "content": "electronics", "status": "in_transit"},
+    23325: {"weight": 8, "content": "clothing", "status": "in_transit"},
+    23326: {"weight": 50, "content": "furniture", "status": "placed"},
     23327: {"weight": 22, "content": "books", "status": "delivered"},
-    23328: {"weight": 12, "content": "kitchen utensils", "status": "pending"},
+    23328: {"weight": 12, "content": "kitchen utensils", "status": "delivered"},
 }
 
 
@@ -334,13 +334,66 @@ def get_shipment_resonse(id:int)->Shipment_response:
     
     """
 
-# i
 
 
 
+# ========================================================================================================
+# ==================================== Module 6 : Different Model ========================================
+# ========================================================================================================
+
+
+shipment_modified_data = {
+    2000: {"weight": 32, "content": "wooden box", "status": "delivered"},
+    2001: {"weight": 15, "content": "electronics", "status": "in_transit"},
+    2002: {"weight": 8, "content": "clothing", "status": "in_transit"},
+    2003: {"weight": 50, "content": "furniture", "status": "placed"},
+    2004: {"weight": 22, "content": "books", "status": "delivered"},
+    2005: {"weight": 12, "content": "kitchen utensils", "status": "delivered"},
+}
+
+
+class BasePayment(str,Enum):
+    cash_on_delivery="cash_on_delivery"
+    on_line_payment="on_line_payment"
+
+class BaseShipment(BaseModel):
+    content:str
+    weight:float
+    status:ShipmentStatus
+    
+class ShipmentRead(BaseShipment):
+    pass
+class ShipmentCreate(BaseShipment):
+    pass
+class ShipmentUpdate(BaseShipment):
+    payment:BasePayment
+
+
+# for get method
+
+@app.get("/shipment_response_different_model",response_model=ShipmentRead)
+def get_shipment_different_model(id:int):
+    if id not in shipment_modified_data:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Given id does't exists in shipment_modified_data"
+        )
+    shipment=shipment_modified_data[id]
+    #shipment.pop("content") # i.e if we miss content it raise: Internal Server error
+    return shipment
 
 
 
+# for patch method
+
+@app.patch("/shipment_path_different_model",response_model=ShipmentUpdate)
+def patch_shipment_data_with_different_model(
+    id: int, body:ShipmentUpdate
+):
+    shipment=shipment_modified_data[id]
+    print(body)
+    shipment.update(body)
+    return {"shipment_data":shipment_modified_data[id]}
 
 
 
