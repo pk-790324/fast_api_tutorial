@@ -142,6 +142,43 @@ cursor=connection.cursor()
 # """)
 
 
+#=====================================================================
+#==============SQL QUERY PARAMETERS ==================================
+#=====================================================================
+
+# # update values 
+# id=234234
+# status='in_transit'
+
+# cursor.execute("""
+#     UPDATE shipment SET status=?
+#     WHERE id=?
+# """,(status,id))
+
+# Another methdo
+
+# id=234235
+# status="delivery_completed"
+
+# cursor.execute("""
+#     UPDATE shipment SET status=:status
+#     WHERE id=:id
+# """,
+#     {"status":status,"id":id}
+# )
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # to push the changes 
 connection.commit()
