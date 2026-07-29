@@ -1,19 +1,29 @@
+from datetime import datetime
 from fastapi import FastAPI,HTTPException,status
 from scalar_fastapi import get_scalar_api_reference
 
 from typing import Any
 import sqlite3
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-class ShipmentCreate(BaseModel):
-    content: str
-    weight: float
+from app.main import ShipmentStatus
 
+class BaseShipment(BaseModel):
+    content:str
+    weight:float=Field(le=25)
+    destination:int
+
+class ShipmentRead(BaseShipment):
+    status:ShipmentStatus
+    estimated_delivery:datetime
+
+class ShipmentCreate(BaseShipment):
+    pass
 class ShipmentUpdate(BaseModel):
-    status: str
-
-
+    status:ShipmentStatus|None=Field(default=None)
+    estimated_delivery:datetime|None=Field(default=None)
+    
 
 
 class Database:
@@ -31,7 +41,9 @@ class Database:
                 id INTEGER PRIMARY KEY,
                 content TEXT,
                 weight REAL,
-                status TEXT
+                destination INTEGER,
+                status TEXT,
+                estimated_delivery DATETIME
             )
     
         """)
@@ -44,7 +56,7 @@ class Database:
         # insert values in the tabel 
         self.cur.execute("""
             INSERT INTO shipment
-            VALUES (:id,:content,:weight,:status)
+            VALUES (:id,:content,:weight,:destination,:status,:estimated_delivery)
         """,{
             "id":new_id,
             **shipment.model_dump(),
@@ -66,7 +78,9 @@ class Database:
             "id":row[0],
             "content":row[1],
             "weight":row[2],
-            "status":row[3],
+            "destination":row[3],
+            "status":row[4],
+            "estimated_time":row[5]
         } if row else None
     
     def update(self,id:int,shipment:ShipmentUpdate)->dict[str,Any]:
