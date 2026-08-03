@@ -2,3 +2,5 @@ fastapi[all]
 scalar_fastapi
 typing
 sqlmodel
+pydantic-settings
+uvicorn[standard]

@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Query
-from fastapi_with_project.project_1.data import menu_item
-from fastapi_with_project.project_1.models import MenuResponse,MenuItem
+from data import menu_item
+from models import MenuResponse,MenuItem
 
 
 
