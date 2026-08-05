@@ -10,3 +10,6 @@ langchain-core
 langchain-qdrant
 langchain-text-splitters
 langchain-ollama
+pymongo
+python-dotenv
+pyPDF2
