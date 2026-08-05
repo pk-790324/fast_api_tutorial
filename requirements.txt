@@ -4,3 +4,9 @@ typing
 sqlmodel
 pydantic-settings
 uvicorn[standard]
+langchain
+langchain-community
+langchain-core
+langchain-qdrant
+langchain-text-splitters
+langchain-ollama
